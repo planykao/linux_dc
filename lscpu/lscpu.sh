@@ -43,7 +43,7 @@ echo "FREQ $CONF_FREQ" >> $CONF
 # get system information
 SYS_CPU=`lscpu | grep Socket | awk '{print $2}'`
 SYS_CORE=`lscpu | grep "CPU(s):" | grep -v NUMA | awk '{print $2}'`
-SYS_FREQ=`dmidecode -t processor | grep GHz | awk '{print $NF}' | sed s/GHz//g | sed -n '1p'`
+SYS_FREQ=`dmidecode -t processor | grep "Current Speed" | awk '{print $3}' | sed -n '1p'`
 
 # dump conf
 printf "\e[1;30;47m%-60s\e[0m\n" "DEFAULT"
