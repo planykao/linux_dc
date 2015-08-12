@@ -72,7 +72,8 @@ maximum() { # $1 = device name, $2 = value
 #DEVS="sda sdb sdc sdd sde sdf sdg sdh sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr sds sdt sdu sdv sdw sdx sdy sdz"
 DEVS=(sda sdb sdc sdd sde sdf sdg sdh sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr sds sdt sdu sdv sdw sdx sdy sdz)
 
-BEGIN_TIME=`date +%s`
+#BEGIN_TIME=`date +%s`
+BEGIN_TIME=$1
 
 # read configuration
 read_config
