@@ -9,6 +9,7 @@ FAIL=0
 BUFFERED_FAIL=0
 
 # devices
+#DEVS="sda sdb sdc sdd sde sdf sdg sdh sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr sds sdt sdu sdv sdw sdx sdy sdz"
 DEVS=(sda sdb sdc sdd sde sdf sdg sdh sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr sds sdt sdu sdv sdw sdx sdy sdz)
 
 read_config() {
@@ -74,58 +75,60 @@ DEVS=(sda sdb sdc sdd sde sdf sdg sdh sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr sd
 
 BEGIN_TIME=`date +%s`
 
-# read configuration
-read_config
-TIMES=$(($TIMES + 1))
+while [ 1 ]; do
+	# read configuration
+	read_config
+	TIMES=$(($TIMES + 1))
 
-DATE="`date`"
-echo "Times: $TIMES, start @ $DATE"
-echo "Times: $TIMES, start @ $DATE" >> $HDPARM_LOG
-echo "# Device MAX MIN" > $HDPARM_RESULT_TMP
+	DATE="`date`"
+	echo "Times: $TIMES, start @ $DATE"
+	echo "Times: $TIMES, start @ $DATE" >> $HDPARM_LOG
+	echo "# Devies MAX MIN" > $HDPARM_RESULT_TMP
 
-# hdaprm test
-for ((i=0; i<${#DEVS[@]}; i++)); do
-	if ls /dev/${DEVS[$i]} > /dev/null 2>&1; then
-		echo " /dev/${DEVS[$i]}:"
-		echo " /dev/${DEVS[$i]}:" >> $HDPARM_LOG
+	# hdaprm test
+	for ((i=0; i<${#DEVS[@]}; i++)); do
+		if ls /dev/${DEVS[$i]} > /dev/null 2>&1; then
+			echo " /dev/${DEVS[$i]}:"
+			echo " /dev/${DEVS[$i]}:" >> $HDPARM_LOG
 
-		BUFFERED_RESULT=`hdparm -t /dev/${DEVS[$i]} | grep buffered | awk '{print $11}' | cut -d'.' -f1 2>&1`
-		minimum ${DEVS[$i]} $BUFFERED_RESULT
-		maximum ${DEVS[$i]} $BUFFERED_RESULT
-		echo "${DEVS[$i]} $MAX $MIN" >> $HDPARM_RESULT_TMP
-		
-		if [ $BUFFERED_RESULT -lt ${BUFFERED[$i]} ]; then
-			FAIL=1
-			BUFFERED_FAIL=1
-		fi
+			BUFFERED_RESULT=`hdparm -t /dev/${DEVS[$i]} | grep buffered | awk '{print $11}' | cut -d'.' -f1 2>&1`
+			minimum ${DEVS[$i]} $BUFFERED_RESULT
+			maximum ${DEVS[$i]} $BUFFERED_RESULT
+			echo "${DEVS[$i]} $MAX $MIN" >> $HDPARM_RESULT_TMP
+			
+			if [ $BUFFERED_RESULT -lt ${BUFFERED[$i]} ]; then
+				FAIL=1
+				BUFFERED_FAIL=1
+			fi
 
-		if [ $BUFFERED_FAIL -eq 0 ]; then
-			echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), PASS"
-			echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), PASS" >> $HDPARM_LOG
+			if [ $BUFFERED_FAIL -eq 0 ]; then
+				echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), PASS"
+				echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), PASS" >> $HDPARM_LOG
+			else
+				echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), FAIL"
+				echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), FAIL" >> $HDPARM_LOG
+			fi
 		else
-			echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), FAIL"
-			echo "    Timing buffered disk reads: $BUFFERED_RESULT(${BUFFERED[$i]}), FAIL" >> $HDPARM_LOG
+#			echo "No such device: $i, test finished."
+			break
 		fi
-	else
-#		echo "No such device: ${DEVS[$i]}, test finished."
-		break
+
+		BUFFERED_FAIL=0
+	done
+
+	if [ $FAIL -eq 1 ]; then
+		FAIL=0
+		TOTAL_FAIL=$((TOTAL_FAIL + 1))
 	fi
 
-	BUFFERED_FAIL=0
+	write_config
+	# save tmp file to result
+	mv $HDPARM_RESULT_TMP $HDPARM_RESULT 2>&1
+
+	time_elapse
+	
+	echo "      [Total Times: $TIMES, Total Fail: $TOTAL_FAIL, $HOUR:$MIN:$SEC elapsed.]"
+	echo "      [Total Times: $TIMES, Total Fail: $TOTAL_FAIL, $HOUR:$MIN:$SEC elapsed.]" >> $HDPARM_LOG
+	echo ""
+	echo "" >> $HDPARM_LOG
 done
-
-if [ $FAIL -eq 1 ]; then
-	FAIL=0
-	TOTAL_FAIL=$((TOTAL_FAIL + 1))
-fi
-
-write_config
-# save tmp file to result
-mv $HDPARM_RESULT_TMP $HDPARM_RESULT 2>&1
-
-time_elapse
-
-echo "      [Total Times: $TIMES, Total Fail: $TOTAL_FAIL, $HOUR:$MIN:$SEC elapsed.]"
-echo "      [Total Times: $TIMES, Total Fail: $TOTAL_FAIL, $HOUR:$MIN:$SEC elapsed.]" >> $HDPARM_LOG
-echo ""
-echo "" >> $HDPARM_LOG

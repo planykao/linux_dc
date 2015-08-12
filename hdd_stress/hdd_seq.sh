@@ -45,7 +45,8 @@ fi
 # devices
 DEVS="sda1 sdb1 sdc1 sdd1 sde1 sdf1 sdg1 sdh1 sdi1 sdj1 sdk1 sdl1 sdm1 sdn1 sdo1 sdp1 sdq1 sdr1 sds1 sdt1 sdu1 sdv1 sdw1 sdx1 sdy1 sdz1"
 
-BEGIN_TIME=`date +%s`
+#BEGIN_TIME=`date +%s`
+BEGIN_TIME=$1
 DATE=`date`
 
 # check configuration
