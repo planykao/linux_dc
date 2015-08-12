@@ -1,7 +1,0 @@
-Times: 7, start @ Mon Mar  9 09:26:53 CST 2015
- /dev/sda:
-    Timing buffered disk reads: 138(130), PASS
-      [Total Times: 7, Total Fail: 0, 0:0:7 elapsed.]
-
-Times: 8, start @ Mon Mar  9 09:27:00 CST 2015
- /dev/sda:
